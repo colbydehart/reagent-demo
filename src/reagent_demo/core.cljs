@@ -2,10 +2,20 @@
     (:require [reagent.core :as reagent :refer [atom]]))
 
 ;; -------------------------
+;; Data
+(def timers [1 4 8])
+
+;; -------------------------
 ;; Views
 
 (defn home-page []
-  [:div [:h2 "Welcome to Reagent"]])
+  (fn []
+    [:div
+     [:h2 "Multi-Timer"]
+
+     [:ul.timers
+      (for [timer timers]
+        [:li {:key timer} "Time: " timer])]]))
 
 ;; -------------------------
 ;; Initialize app
