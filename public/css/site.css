@@ -9,6 +9,12 @@ body {
   line-height: 1.5em;
 }
 
+#app {
+  width: 300px;
+  margin: auto;
+  text-align: center;
+}
+
 h1, h2, h3 {
   color: #000;
 }
@@ -31,4 +37,10 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+ul {
+  border: 2px solid #aaa;
+  border-radius: 6px;
+  padding: 20px;
 }
