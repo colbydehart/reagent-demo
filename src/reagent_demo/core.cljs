@@ -1,164 +1,182 @@
 (ns reagent-demo.core
-    (:require [reagent.core :as reagent :refer [atom]]))
+  (:require [reagent.core :as reagent]))
 
-;; -------------------------
-;; Views
+;; github repo:
+;; https://github.com/colbydehart/reagent-demo
 
-(defn home-page []
-  [:div [:h2 "Welcome to Reagent"]])
+;; This talk is broken into a few parts
+;; 1. Learn basic syntax of Clojure
+;; 2. Learn about ClojureScript and Reagent
+;; 3. Make and run an actual Reagent app
+;; 4. Learn how to manage state in a Reagent app
+;; 5. Make a less trivial example of a webapp.
+;;___________________________________
+;; Basic syntax
+;;___________________________________
 
-;; -------------------------
-;; Initialize app
-
-(defn mount-root []
-  (reagent/render [home-page] (.getElementById js/document "app")))
-
-(defn init! []
-  (mount-root))
-
-;; GH repo https://github.com/colbydehart/reagent-demo
-
-;; Today we are going to learn ClojureScript and that is fun!
-
-;; This talk is broken into a few part
-;; - Learn basic syntax of Clojure
-;; - Learn about ClojureScript and Reagent
-;; - Make and run an actual ClojureScript application
-;; - Learn how to manage state in a Reagent application
-;; - Make a less trivial example of a working webapp.
-
-;; Clojure is a functional programming language on the
-;; JVM. Clojure is a lisp, which is different than most
-;; programming languages. Lisps use prefix notation,
-;; which means that when you call a function, it looks
+;; Clojure is a functional programming
+;; language on the JVM. Clojure is a
+;; lisp, which is different than most
+;; programming languages. Lisps use
+;; prefix notation, which means that
+;; when you call a function, it looks
 ;; like this.
 
-;;function
+;; function
 ;; |        
 ;; | -----arguments
 ;; | | |    
 ;; v v v    
-(+ 1 1)
-
-;; That is the main difference between lisp and other
-;; languages (but there are many more!)
-
-;; you can also call functions inside of other
-;; functions just by nesting the parenthesis
-;; 1 + (2 * 3)
+  (+ 1 1)
+;; Function calls inside of function calls:
 (+ 1 (* 2 3))
+;; similar to: 1 + (2 * 3)
 
-;; Printing out to the console 
-;; print("hello world")
-(println "hello world")
+;;___________________________________
+;; Data structures
+;;___________________________________
 
-;; Clojure has basic types very similar to types in JavaScript
 3 ; Numbers!
 "wut" ; Strings! double quotes!
 true ; Booleans!
-:very-cool ; Symbols!
+:very-cool ; Keywords!
+["A String" true :a-symbol] ; Vectors!
+{:first "Colby" :last "DeHart"} ; Maps!
 
-;; Vectors are surrounded in brackets and similar
-;; to Arrays in JavaScript
-["A String" true :a-symbol]
-;; Maps are surrounded by curly braces and similar
-;; to Objects or HashMaps in JavaScript
-{:name "Colby"
- :occupation "Developer"
- :bodacious true}
 
-;; You can bind values to names with 'def'
-;; (think of 'const' and 'let' in JS)
-(def me "colby")
+;;___________________________________
+;; Binding data 
+;;___________________________________
+
+(def me "colby") ; think of const/let
 me
 
-;; You can also bind variables for just one expression
-;; with 'let'(notice that the let bindings are in square
-;; brackets. This is also how function parameters are
-;; handled as we'll see soon.)
-(let [x 3
+(let [x 3  ; <- binding vector
       y 4]
-  (println x)
-  (println y)
-  (+ x y))
+  (+ x y)) ; <- expression
 
-;; You can also make your own functions (obviously,
-;; it is a functional language) with 'fn'. 
-;; 'fn' takes in a vector of parameters and then any number
-;; of expressions to be run as the body of the function
-(fn [x] (+ x 3))
-;; The return value of a function is the value of the
-;; last expression.
+;;___________________________________
+;; Functions
+;;___________________________________
 
-;; You can use the 'defn' macro to make a
-;; function and bind it to a name
-(defn add-three [x] (+ x 3))
-;; identical to: (def add-three (fn [x] (+ x 3)))
+(fn
+  [x]      ; <- binding vector
+  (+ x 3)) ; <- function body
+
+;; JS equivalent:
+;; function (x) {
+;;   return x + 3
+;; }
+
+;; shorthand notation
+#(+ %1 3) ; (x) => x + 3
+
+(defn add-three
+  "Adds three to a number" ; optional docstring
+  [x]
+  (+ x 3))
 (add-three 7)
 
-;; A few useful functions for getting around in clojure
-;; - str: creates a string from the arguments passed in
-(str "Nice " "Sweet")
-(let [middle "And"]
-  (str "Rock " middle " Roll"))
-;; - inc: increments a number by one.
-;;   (similar to the ++ operator in JS)
-(inc 3)
-;; - conj: 'conjoins' a collection with an element.
-;;   this will be the main way you add elements to
-;;   collections
-(conj [1 2 3] 4)
-;; There are also functions in other namespaces.
-;; to use these you need to prefix the function
-;; with a namespace and a slash.
-(clojure.string/join [8 6 7 5 3 0 9])
-;; The "js" namespace is where JS objects live.
-js/document
+;; identical to:
+;; (def add-three (fn [x] (+ x 3)))
 
-;; There are lots of great functions for collections
-;; in clojure, you probably know most of these.
-;; 'map' maps over a sequence (or array or map)
-;; returning a new sequence with a function applied. 
+;;___________________________________
+;; Built in functions
+;;___________________________________
+
 (def my-vec [1 2 3])
 
 ;;   -------- The function to run on each
 ;;   |        item in the collection.   
 ;;   |        
-;;   |   ---- The collection to be mapped over.    
+;;   |   ---- The collection to be mapped over.
 ;;   |   |
 ;;   |   |
 (map inc my-vec)
+;; myVec.map(R.inc)
 
-;; Notice i said, "a new sequence". Data
-;; in Clojure is immutable. You can't change
-;; a vector, only create a new one with updates
-;; applied.
+;; Clojure data structures are immutable
 my-vec
 
-;; More advanced function example!
+;; Calling function from other namespace
+(clojure.string/join [8 6 7 5 3 0 9])
+
+;; More advanced function
 (map add-three (conj [1 2 3] 4))
 
-;; Clojurescript is a language which transpiles clojure to
-;; JavaScript using Google's Closure compiler. For the most
-;; part, it is very similar to Clojure and many parts of the
-;; core library is included.
+(let [hexidecimals "1234567890ABCDEF"
+      get-digit #(rand-nth hexidecimals)
+      digits (repeatedly 6 get-digit)
+      hex-code (concat ["#"] digits)]
+  (clojure.string/join hex-code))
 
-;; To call a function on a Javascript object, you call
-;; the function first, dot-prefixed, and then the object
-;; you are calling it on, followed by any arguments like
-;; this.
+;;___________________________________
+;; JS interop
+;;___________________________________
+
+;; Clojurescript is a language which transpiles
+;; clojure to JavaScript using Google's Closure
+;; compiler. For the most part, it is very
+;; similar to Clojure and many parts of the
+;; core library are included.
+
+;; JS namespace
+;; (js/alert "Heyo")
+
+;; JS function call syntax
 (.log js/console "Tubular")
-;; Some common functions can be called with shorthand
+
+;; JS function call shorthand
 (js/console.log "Radical")
 
 (def el (.getElementById js/document "app"))
+el
 
-;; Since clojure will assume everything at the start
-;; of a form is a function and attempt to invoke it,
-;; if you want a property, you have to prefix it with
-;; ".-" like this.
+;; JS property call with .-
 (.-innerHTML el)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Pretty neat huh? we'll learn more stuff, but
-;; let's get back to the main project for now.
+(defn home []
+  [:div
+   [:h1 "Getting Started with Clojurescript and Reagent!"]
+   [:h3 "Colby DeHart"]
+   [:h3 {:style {:color "lightblue"}}"@colbydehart"]])
+
+(defn mount-root []
+  (reagent/render home (.getElementById js/document "app")))
+
+(defn init! [] (mount-root))
